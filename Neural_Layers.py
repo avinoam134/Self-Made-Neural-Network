@@ -56,6 +56,35 @@ class LossLayer(Layer):
     def backward(self, Y):
         self.loss, self.dW, self.db, self.dX = self.activation["der"](self.X, Y, self.W, self.b)
         return self.dX
+    
+
+class ResisudalLayer(Layer):
+    def __init__(self, input_dim, activation):
+        super().__init__(input_dim, input_dim, activation)
+        self.W = None
+        self.W1 = np.random.rand(input_dim, input_dim)
+        self.W2 = np.random.rand(input_dim, input_dim)
+
+    def forward (self, X):
+        self.X = X
+        self.linear_calc = np.dot(self.W1, self.X) + self.b
+        act = self.activation["calc"](self.linear_calc)
+        self.Y = np.dot(self.W2, self.X) + act
+        return self.Y
+    
+    def backward(self, dY):
+        pass
+    
+    def update (self, alpha):
+        self.W1 -= alpha*self.dW1
+        self.W2 -= alpha*self.dW2
+        self.b -= alpha*self.db
+
+
+
+
+
+
 
 
 

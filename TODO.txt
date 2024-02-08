@@ -1,0 +1,12 @@
+1. create a single layer jacobian test
+2. create a report for so far
+3. implement a resnet
+
+
+For the report:
+1. a map around the files
+2. question headline and description as output + text + relevant files,classes,functions
+
+
+
+X: feat1, feat2
