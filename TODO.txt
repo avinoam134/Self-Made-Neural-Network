@@ -1,12 +1,8 @@
-1. create a single layer jacobian test
-2. create a report for so far
-3. implement a resnet
+1. see why combined nets (res and regular layers) give weird gradient test results
+2. finish parts 4-5
 
 
 For the report:
 1. a map around the files
 2. question headline and description as output + text + relevant files,classes,functions
 
-
-
-X: feat1, feat2

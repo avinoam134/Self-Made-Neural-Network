@@ -31,7 +31,8 @@ def get_network_loss_and_dx(NN, X, Y):
     loss = NN.layers[-1].loss
     return loss, dX
 
-#following the same logic from the previous gradient/jacoian verification
+#following the same logic from the previous gradient/jacoian verification:
+
 def network_gradient_verification(NN, X, Y, epsilons):
     input_features = NN.layers[0].W.shape[1]
     d = np.random.rand(input_features, 1)
