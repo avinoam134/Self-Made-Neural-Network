@@ -33,9 +33,10 @@ class Layer:
         return self.Y
 
     def backward(self, dY):
-        self.db = dY * self.activation["der"](self.linear_calc)
-        self.dW = np.dot(self.db, self.X.T)
-        self.dX = np.dot(self.W.T, self.db)
+        db_unsummed = dY * self.activation["der"](self.linear_calc)
+        self.db = np.sum(db_unsummed)
+        self.dW = np.dot(db_unsummed, self.X.T)
+        self.dX = np.dot(self.W.T, db_unsummed)
         return self.dX
 
     def update(self, alpha):
@@ -58,10 +59,12 @@ class LossLayer(Layer):
         return self.dX
     
 
-class ResisudalLayer(Layer):
+class ResidualLayer(Layer):
     def __init__(self, input_dim, activation):
         super().__init__(input_dim, input_dim, activation)
-        self.W = None
+        #self.W = None
+        self.dW1 = None
+        self.dW2 = None
         self.W1 = np.random.rand(input_dim, input_dim)
         self.W2 = np.random.rand(input_dim, input_dim)
 
@@ -69,16 +72,31 @@ class ResisudalLayer(Layer):
         self.X = X
         self.linear_calc = np.dot(self.W1, self.X) + self.b
         act = self.activation["calc"](self.linear_calc)
-        self.Y = np.dot(self.W2, self.X) + act
+        self.Y = np.dot(self.W2, act) + X
         return self.Y
     
     def backward(self, dY):
-        pass
-    
+        lin_der = self.activation["der"](self.linear_calc)
+        lin_der_W2T = lin_der * self.W2.T
+        db_unsummed = np.dot(lin_der_W2T, dY)
+        self.db = np.sum(db_unsummed)
+        self.W1 = np.dot(db_unsummed, self.X.T)
+        self.dW2 = np.dot(dY, self.linear_calc.T)
+        self.dX = np.dot(np.dot(self.W1.T, lin_der_W2T) + np.identity(self.W1.shape[0]), dY)
+        #diag = np.diag(lin_der.reshape(-1))
+        #print (diag.shape)
+        #self.dX = np.dot(np.dot(self.W2, np.dot(diag, self.W1)).T + np.identity(self.W1.shape[0]), dY)
+        #self.dX = np.dot(np.dot(self.W2, np.sum(lin_der, axis=1)*self.W1).T + np.identity(self.W1.shape[0]), dY)
+        #self.dX = np.dot(dY, self.W2.T) * lin_der
+        # self.dX = np.dot((np.dot(self.W1.T, dY) * lin_der).T, self.W2.T)
+        print (self.dX.shape)
+        return self.dX
+
     def update (self, alpha):
         self.W1 -= alpha*self.dW1
         self.W2 -= alpha*self.dW2
         self.b -= alpha*self.db
+
 
 
 

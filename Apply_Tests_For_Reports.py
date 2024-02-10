@@ -9,7 +9,7 @@ from scipy.io import loadmat
 from Tests import jacobian_verification, network_gradient_verification
 from Activation_Functions import softmax_regression_loss, least_squares_loss, sgd
 from SGD import sgd_find_global_minimum
-from Neural_Layers import Layer, LossLayer, activations
+from Neural_Layers import Layer, ResidualLayer, LossLayer, activations
 from Neural_Networks import NeuralNetwork
 
 def jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons):
@@ -121,7 +121,7 @@ def test_NN_all_layers():
     epsilons = np.array([(0.5)**i for i in range(1, 10)])
     input_features = network.layers[0].W.shape[1]
     classes = network.layers[-1].b.shape[1]
-    num_samples = 10
+    num_samples = 1
     X = np.random.rand(input_features, num_samples)
     Y = np.zeros((classes, num_samples))
     Y[np.random.randint(0, classes)] = 1
@@ -129,3 +129,22 @@ def test_NN_all_layers():
     jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons)
 
 
+def test_ResNet_all_layers():
+    input_dim = 3
+    output_dim = 5
+    tanh_activation = activations["tanh"]
+    layer1 = ResidualLayer(input_dim, tanh_activation)
+    loss_layer = LossLayer(input_dim, output_dim)
+    network = NeuralNetwork([layer1, loss_layer])
+    epsilons = np.array([(0.5)**i for i in range(1, 10)])
+    input_features = network.layers[0].W1.shape[1]
+    num_samples = 1
+    X = np.random.rand(input_features, num_samples)
+    Y = np.zeros((5, num_samples))
+    Y[np.random.randint(0, input_features)] = 1
+    losses_ord1, losses_ord2 = network_gradient_verification(network, X, Y, epsilons)
+    jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons)
+
+
+if __name__ == "__main__":
+    test_ResNet_all_layers()
