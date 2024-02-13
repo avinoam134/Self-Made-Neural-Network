@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from Tests_Utils import jacobian_verification, network_gradient_verification, jacobian_verification_visualizer, parse_data, test_network_on_data_set
 from Activation_Functions import softmax_calculate, softmax_regression_loss, least_squares_loss, sgd
 from SGD import sgd_find_global_minimum
-from Neural_Layers import activations, Layer, ResidualLayer, LossLayer, NeuralNetwork
+from Neural_Network import activations, Layer, ResidualLayer, LossLayer, NeuralNetwork
 
 
 def P1Q1_test_softmax_regression_loss():
@@ -195,7 +195,7 @@ def P2Q5_test_network_on_limited_data_set(data_set_name):
     data_to_test[data_set_name](limited=True)
 
 def main():
-    P2Q5_test_network_on_limited_data_set(data_set_name="GMMData")
+    P2Q4_test_network_on_data_set("SwissRollData")
     
 if __name__ == "__main__":
     main()
