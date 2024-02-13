@@ -31,6 +31,9 @@ def softmax_regression_loss(X, Y, W, b):
     dx = np.dot(W, softmax.T - Y) / num_samples
     return loss, dw, db, dx
 
+'''
+1. check if db is calculated correctly
+2. check if dsoftmax should be taken with Y'''
 
 def sgd(X, Y, W, b, loss_function,  alpha = 0.1, num_iterations = 10000):
     losses = []
@@ -52,5 +55,11 @@ def tanh_calculate(X):
 
 def tanh_derive(X):
     return 1 - np.tanh(X)**2
+
+def relu_calculate(X):
+    return np.maximum(0, X)
+
+def relu_derive(X):
+    return (X > 0).astype(int)
 
 

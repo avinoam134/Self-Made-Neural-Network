@@ -1,8 +1,1 @@
-1. see why combined nets (res and regular layers) give weird gradient test results
-2. finish parts 4-5
-
-
-For the report:
-1. a map around the files
-2. question headline and description as output + text + relevant files,classes,functions
 

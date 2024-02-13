@@ -4,25 +4,12 @@ to test various implementations
 '''
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.io import loadmat
 
-from Tests import jacobian_verification, network_gradient_verification
-from Activation_Functions import softmax_regression_loss, least_squares_loss, sgd
+
+from Tests_Utils import jacobian_verification, network_gradient_verification, jacobian_verification_visualizer, parse_data, test_network_on_data_set
+from Activation_Functions import softmax_calculate, softmax_regression_loss, least_squares_loss, sgd
 from SGD import sgd_find_global_minimum
-from Neural_Layers import Layer, ResidualLayer, LossLayer, activations
-from Neural_Networks import NeuralNetwork
-
-def jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons):
-    epsilons = np.sort(epsilons)
-    plt.plot(epsilons, losses_ord1, label='First Order - O(\u03B5)')
-    plt.plot(epsilons, losses_ord2, label='Second Order - O(\u03B5^2)')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel('Epsilon')
-    plt.ylabel('Loss')
-    plt.title('Gradient Verification - Log Scale')
-    plt.legend()
-    plt.show()
+from Neural_Layers import activations, Layer, ResidualLayer, LossLayer, NeuralNetwork
 
 
 def P1Q1_test_softmax_regression_loss():
@@ -74,42 +61,21 @@ def P1Q2_test_sgd_with_least_squares():
     plt.tight_layout()
     plt.show()
 
-
-def parse_data(filename):
-    path = f"./HW1_Data/{filename}.mat"
-    data = loadmat(path)
-    Yt = data['Yt']
-    Ct = data['Ct']
-    Yv = data['Yv']
-    Cv = data['Cv']
-    return Yt, Ct, Yv, Cv
-
-
 def P1Q3_test_sgd_with_softmax(data_set_name):
     Yt, Ct, Yv, Cv = parse_data(data_set_name)
-    num_samples = Yt.shape[1]
-    num_features = Yt.shape[0]
-    num_classes = Ct.shape[0]
-    #initialize W and b:
-    W = np.random.rand(num_features, num_classes)
-    b = np.random.rand(num_classes, 1)
-    #perform batch sgd:
     alpha = 0.1
     num_iterations = 50
-    batch_size = [20, 200, 2000, 20000]
+    batch_size = 20000
     test_size = 5000
     loss_function = softmax_regression_loss
-    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
-    for i in range(4):
-        W_final, b_final, losses, test_losses = sgd_find_global_minimum(Yt, Ct, Yv, Cv, loss_function, alpha, num_iterations, batch_size[i], test_size)
-        #plot the train and test losses:
-        axs[i//2, i%2].plot(losses, label=f'Train Loss - Batch Size: {batch_size[i]}')
-        axs[i//2, i%2].plot(test_losses, label=f'Test Loss - Batch Size: {batch_size[i]}')
-        axs[i//2, i%2].set_xlabel('Iteration')
-        axs[i//2, i%2].set_ylabel('Loss')
-        axs[i//2, i%2].set_title(f'Train and Test Losses - Batch Size: {batch_size[i]}')
-        axs[i//2, i%2].legend()
-    plt.tight_layout()
+    W_final, b_final, losses, test_losses = sgd_find_global_minimum(Yt, Ct, Yv, Cv, loss_function, alpha, num_iterations, batch_size, test_size)
+    accuracy = np.mean(np.argmax(softmax_calculate(np.dot(Yv.T, W_final) + b_final.T), axis=1) == np.argmax(Cv.T, axis=1))
+    plt.plot(losses, label=f'Train Loss')
+    plt.plot(test_losses, label=f'Test Loss')
+    plt.xlabel('Iteration')
+    plt.ylabel('Loss')
+    plt.title(f'Train & Test Losses. Model Accuracy: {accuracy:.2f}')
+    plt.legend()
     plt.show()
 
 
@@ -152,29 +118,84 @@ def P2Q2_test_ResNet_all_layers():
     losses_ord1, losses_ord2 = network_gradient_verification(network, X, Y, epsilons)
     jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons)
 
-def P2Q3_test_combined_layers():
-    input_dim = 5
-    hidden_1 = 7
-    hidden_2 = 3
-    num_samples = 10
+def P2Q3():
+    pass
+
+def P2Q4_test_networks_on_swissroll_data(limited=False):
+    input_dim = 2
+    hidden_layer = 6
+    num_samples= 30
+    relu_activation = activations["relu"]
+    layer1 = ResidualLayer(input_dim, num_samples ,relu_activation)
+    layer1_1 = Layer(input_dim, hidden_layer, relu_activation)
+    layer2 = ResidualLayer(hidden_layer, num_samples ,relu_activation)
+    layer2_1 = Layer(hidden_layer, input_dim, relu_activation)
+    layer3 = ResidualLayer(input_dim, num_samples ,relu_activation)
+    loss_layer = LossLayer(input_dim, input_dim)
+    network = NeuralNetwork([layer1, layer1_1, layer2, layer2_1, layer3, loss_layer])
+    train_losses, test_loss, test_accurcy = test_network_on_data_set("SwissRollData", network, limited)
+    plt.plot(train_losses, label="train_loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title(f'Test Loss: {test_loss}, Model Accuracy: {test_accurcy:.2f}')
+    plt.legend()
+    plt.show()
+
+def P2Q4_test_networks_on_peaks_data(limited=False):
+    input_dim = 2
+    hidden_layer = 6
     output_dim = 5
-    tanh_activation = activations["tanh"]
-    layer1 = Layer(input_dim, hidden_1, tanh_activation)
-    layer2 = ResidualLayer(hidden_1, num_samples ,tanh_activation)
-    layer3 = Layer(hidden_1, hidden_2, tanh_activation)
-    loss_layer = LossLayer(hidden_2, output_dim)
-    network = NeuralNetwork([layer1, layer2, layer3, loss_layer])
-    epsilons = np.array([(0.5)**i for i in range(1, 10)])
-    input_features = network.layers[0].W.shape[1]
-    X = np.random.rand(input_features, num_samples)
-    Y = np.zeros((output_dim, num_samples))
-    Y[np.random.randint(0, input_features)] = 1
-    losses_ord1, losses_ord2 = network_gradient_verification(network, X, Y, epsilons)
-    jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons)
+    num_samples= 30
+    relu_activation = activations["relu"]
+    layer1 = ResidualLayer(input_dim, num_samples ,relu_activation)
+    layer1_1 = Layer(input_dim, hidden_layer, relu_activation)
+    layer2 = ResidualLayer(hidden_layer, num_samples ,relu_activation)
+    layer2_1 = Layer(hidden_layer, input_dim, relu_activation)
+    layer3 = ResidualLayer(input_dim, num_samples ,relu_activation)
+    loss_layer = LossLayer(input_dim, output_dim)
+    network = NeuralNetwork([layer1, layer1_1, layer2, layer2_1, layer3, loss_layer])
+    train_losses, test_loss, test_accurcy = test_network_on_data_set("PeaksData", network, limited)
+    plt.plot(train_losses, label="train_loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title(f'Test Loss: {test_loss}, Model Accuracy: {test_accurcy:.2f}')
+    plt.legend()
+    plt.show()
+
+def P2Q4_test_networks_on_gmm_data(limited=False):
+    input_dim = 5
+    hidden_layer = 6
+    num_samples= 30
+    relu_activation = activations["relu"]
+    layer1 = ResidualLayer(input_dim, num_samples ,relu_activation)
+    layer1_1 = Layer(input_dim, hidden_layer, relu_activation)
+    layer2 = ResidualLayer(hidden_layer, num_samples ,relu_activation)
+    layer2_1 = Layer(hidden_layer, input_dim, relu_activation)
+    layer3 = ResidualLayer(input_dim, num_samples ,relu_activation)
+    loss_layer = LossLayer(input_dim, input_dim)
+    network = NeuralNetwork([layer1, layer1_1, layer2, layer2_1, layer3, loss_layer])
+    train_losses, test_loss, test_accurcy = test_network_on_data_set("GMMData", network, limited)
+    plt.plot(train_losses, label="train_loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title(f'Test Loss: {test_loss}, Model Accuracy: {test_accurcy:.2f}')
+    plt.legend()
+    plt.show()
+
+data_to_test = {
+    "SwissRollData": P2Q4_test_networks_on_swissroll_data,
+    "PeaksData": P2Q4_test_networks_on_peaks_data,
+    "GMMData": P2Q4_test_networks_on_gmm_data
+}
+
+def P2Q4_test_network_on_data_set(data_set_name):
+    data_to_test[data_set_name]()
+
+def P2Q5_test_network_on_limited_data_set(data_set_name):
+    data_to_test[data_set_name](limited=True)
 
 def main():
-    P2Q3_test_combined_layers()
-
-
+    P2Q5_test_network_on_limited_data_set(data_set_name="GMMData")
+    
 if __name__ == "__main__":
     main()
