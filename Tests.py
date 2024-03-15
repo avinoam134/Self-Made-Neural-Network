@@ -12,7 +12,7 @@ from SGD import sgd_find_global_minimum
 from Neural_Network import activations, Layer, ResidualLayer, LossLayer, NeuralNetwork
 
 
-def P1Q1_test_softmax_regression_loss():
+def test_softmax_regression_loss():
     num_features = 5
     num_classes = 3
     num_samples = 10
@@ -31,7 +31,7 @@ def P1Q1_test_softmax_regression_loss():
     jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons)
 
 
-def P1Q2_test_sgd_with_least_squares():
+def test_sgd_with_least_squares():
     #create data A, b s.t the appropriate functions will make y=2x (for example):
     A = np.random.rand(100, 1)
     b = 2*A
@@ -61,7 +61,7 @@ def P1Q2_test_sgd_with_least_squares():
     plt.tight_layout()
     plt.show()
 
-def P1Q3_test_sgd_with_softmax(data_set_name):
+def test_sgd_with_softmax(data_set_name):
     Yt, Ct, Yv, Cv = parse_data(data_set_name)
     alpha = 0.1
     num_iterations = 50
@@ -79,7 +79,7 @@ def P1Q3_test_sgd_with_softmax(data_set_name):
     plt.show()
 
 
-def P2Q1_test_NN_all_layers():
+def test_NN_all_layers():
     input_dim = 3
     hidden_1 = 2
     hidden_2 = 7
@@ -100,7 +100,7 @@ def P2Q1_test_NN_all_layers():
     jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons)
 
 
-def P2Q2_test_ResNet_all_layers():
+def test_ResNet_all_layers():
     input_dim = 5
     num_samples = 10
     output_dim = 5
@@ -118,10 +118,8 @@ def P2Q2_test_ResNet_all_layers():
     losses_ord1, losses_ord2 = network_gradient_verification(network, X, Y, epsilons)
     jacobian_verification_visualizer(losses_ord1, losses_ord2, epsilons)
 
-def P2Q3():
-    pass
 
-def P2Q4_test_networks_on_swissroll_data(limited=False):
+def test_networks_on_swissroll_data(limited=False):
     input_dim = 2
     hidden_layer = 6
     num_samples= 30
@@ -141,7 +139,7 @@ def P2Q4_test_networks_on_swissroll_data(limited=False):
     plt.legend()
     plt.show()
 
-def P2Q4_test_networks_on_peaks_data(limited=False):
+def test_networks_on_peaks_data(limited=False):
     input_dim = 2
     hidden_layer = 6
     output_dim = 5
@@ -162,7 +160,7 @@ def P2Q4_test_networks_on_peaks_data(limited=False):
     plt.legend()
     plt.show()
 
-def P2Q4_test_networks_on_gmm_data(limited=False):
+def test_networks_on_gmm_data(limited=False):
     input_dim = 5
     hidden_layer = 6
     num_samples= 30
@@ -183,19 +181,19 @@ def P2Q4_test_networks_on_gmm_data(limited=False):
     plt.show()
 
 data_to_test = {
-    "SwissRollData": P2Q4_test_networks_on_swissroll_data,
-    "PeaksData": P2Q4_test_networks_on_peaks_data,
-    "GMMData": P2Q4_test_networks_on_gmm_data
+    "SwissRollData": test_networks_on_swissroll_data,
+    "PeaksData": test_networks_on_peaks_data,
+    "GMMData": test_networks_on_gmm_data
 }
 
-def P2Q4_test_network_on_data_set(data_set_name):
+def test_network_on_data_set(data_set_name):
     data_to_test[data_set_name]()
 
-def P2Q5_test_network_on_limited_data_set(data_set_name):
+def test_network_on_limited_data_set(data_set_name):
     data_to_test[data_set_name](limited=True)
 
 def main():
-    P2Q4_test_network_on_data_set("SwissRollData")
+    test_network_on_limited_data_set("SwissRollData")
     
 if __name__ == "__main__":
     main()
